@@ -9,4 +9,4 @@ ahrs_pkg
 
 2. 소스 코드
 --------------
-[ahrs_node.py](https://github.com/dydwo92/alphaD-ROS/blob/master/alphad-ros-pkg/control-pkg/ahrs_pkg/src/ahrs_node_pkg/ahrs_node.py)
+* [ahrs_node.py](https://github.com/dydwo92/alphaD-ROS/blob/master/alphad-ros-pkg/control-pkg/ahrs_pkg/src/ahrs_node_pkg/ahrs_node.py)
