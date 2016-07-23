@@ -33,7 +33,10 @@ add_executable(imu_baro_node
   src/mpu9250.cpp
 )
 
-add_dependencies(imu_baro_node wiringPi)
+add_dependencies(imu_baro_node
+	wiringPi
+	${imu_baro_pkg_EXPORTED_TARGETS}
+)
 target_link_libraries(imu_baro_node
   ${catkin_LIBRARIES}
   ${WIRINGPI_LIBRARY}
