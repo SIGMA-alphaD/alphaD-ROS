@@ -1,0 +1,8 @@
+<launch>
+
+<group ns = "alphaD">
+	<node pkg="i2c_master" type="i2c_run" name="i2c_run"/>
+	<node pkg="rosbridge_server" type="rosbridge_websocket" name="rosbridge_websocket"/>
+</group>
+
+</launch>
