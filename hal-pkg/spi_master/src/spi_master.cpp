@@ -14,9 +14,9 @@ int main(int argc, char** argv){
 	
 	int i;
 
-	ros::init(argc,argv,"i2c_run");
+	ros::init(argc,argv,"spi_run");
 	ros::NodeHandle nh;
-	ros::Publisher imu_pub = nh.advertise<sensor_msgs::Imu>("imu/data_raw", 100);
+	ros::Publisher imu_pub = nh.advertise<sensor_msgs::Imu>("info/imu/data_raw", 100);
 	//ros::Publisher mag_pub = nh.advertise<sensor_msgs::MagneticField>("imu/mag", 100);
 
 	ros::Rate loop_rate(400); //400Hz

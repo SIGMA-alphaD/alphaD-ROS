@@ -11,7 +11,8 @@
 *******************************************************************************/
 
 #include <ros/ros.h>
-#include <std_msgs/String.h>
+#include <std_msgs/Float32.h>
+#include <std_msgs/Float32MultiArray.h>
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
@@ -20,12 +21,9 @@
 #include "i2c_master/pca9685.h"
 #include "i2c_master/ads1115.h"
 
-#include "i2c_master/i2c_control.h"
-#include "i2c_master/i2c_info.h"
-
 using namespace std;
 
-void Callback(const i2c_master::i2c_control::ConstPtr& msg);
+void Callback(const std_msgs::Float32MultiArray::ConstPtr& msg);
 void timerCallback(const ros::TimerEvent&);
 
 // Global ROS handler
@@ -39,8 +37,8 @@ int main(int argc, char** argv){
 	ros::init(argc,argv,"i2c_run");
 	ros::NodeHandle nh;	
 	
-	sub = nh.subscribe("/i2c_master/control", 1000, Callback);
-	pub = nh.advertise<i2c_master::i2c_info>("/i2c_master/info", 10);
+	sub = nh.subscribe("control/pwm", 1000, Callback);
+	pub = nh.advertise<std_msgs::Float32>("info/battery", 10);
 
 	ph.Setup(100); // 100Hz pwm
 	ah.Setup(0, 4);  // gain 2/3 , 128sps
@@ -52,19 +50,19 @@ int main(int argc, char** argv){
 	return 0;
 }
 
-void Callback(const i2c_master::i2c_control::ConstPtr& msg){
+void Callback(const std_msgs::Float32MultiArray::ConstPtr& msg){
 	int i, duty;
 
 	for(i=0;i<8;i++){
 		// map 0.0 ~ 100.0(float) to 0 ~ 4096(int)
-		duty = (int)(msg->pwmDuty[i]*40.96);
+		duty = (int)(msg->data[i]*40.96);
 		ph.AnalogWrite(i+1, duty);
 	}
 }
 
 void timerCallback(const ros::TimerEvent&){
-	i2c_master::i2c_info info;
+	std_msgs::Float32 info;
 
-	info.batteryVolt = ah.AnalogRead(1);
+	info.data = ah.AnalogRead(1);
 	pub.publish(info);
 }

@@ -10,7 +10,7 @@ _q_mag = [0] * 4
 # sudo _mag
 _mag = [1, 0, 0]
 
-_pub = rospy.Publisher('imu/data', Imu, queue_size = 10)
+_pub = rospy.Publisher('info/imu/data', Imu, queue_size = 10)
 
 def callback(data):
     global _initState
@@ -101,8 +101,8 @@ def quat2euler(q):
 
 
 def listener():
-    rospy.init_node('ahrs_node')
-    rospy.Subscriber("imu/data_raw", Imu, callback)
+    rospy.init_node('imu_filter_run')
+    rospy.Subscriber("info/imu/data_raw", Imu, callback)
 
     rospy.loginfo(" Test: start spinning!")
     rospy.spin()

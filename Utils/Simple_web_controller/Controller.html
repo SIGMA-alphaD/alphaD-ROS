@@ -51,22 +51,22 @@
 
 		var i2c_listener = new ROSLIB.Topic({
 			ros : ros,
-			name : '/i2c_master/info',
-			messageType : 'i2c_master/i2c_info'
+			name : '/info/battery',
+			messageType : 'std_msgs/Float32'
 		});
 
 		i2c_listener.subscribe(function(message){
-			$("#batteryVolt").text(message.batteryVolt.toFixed(3) + " V");
+			$("#batteryVolt").text(message.data.toFixed(3) + " V");
 		});
 
 		var i2c_publisher = new ROSLIB.Topic({
 			ros : ros,
-			name : '/i2c_master/control',
-			messageType : 'i2c_master/i2c_control'
+			name : '/control/pwm',
+			messageType : 'std_msgs/Float32MultiArray'
 		});
 
 		var i2c_control = {
-			pwmDuty : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+			data : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 		};
 		
 		i2c_publisher.publish(new ROSLIB.Message(i2c_control));
@@ -85,13 +85,13 @@
 					slide: function(event, ui){
 						var slide_num = $(this).attr("order");
 						var value = ui.value;
-						i2c_control.pwmDuty[slide_num] = 0.1*value + 10.0;
+						i2c_control.data[slide_num] = 0.1*value + 10.0;
 						i2c_publisher.publish(new ROSLIB.Message(i2c_control));
 					},
 					change : function(event, ui){
 						var slide_num = $(this).attr("order");
 						var value = ui.value;
-						i2c_control.pwmDuty[slide_num] = 0.1*value + 10.0;
+						i2c_control.data[slide_num] = 0.1*value + 10.0;
 						i2c_publisher.publish(new ROSLIB.Message(i2c_control));						
 					}
 			  });
@@ -169,7 +169,7 @@
 			// T + 2s
 			setTimeout(function(){
 				// Turn On
-				i2c_control.pwmDuty[4] = 100;
+				i2c_control.data[4] = 100;
 				i2c_publisher.publish(new ROSLIB.Message(i2c_control));
 			}, 2000);
 
@@ -195,7 +195,7 @@
 		function escOff(){
 			var i;
 			for(i=0;i<8;i++)
-				i2c_control.pwmDuty[i] = 0.0;
+				i2c_control.data[i] = 0.0;
 
 			i2c_publisher.publish(new ROSLIB.Message(i2c_control));
 		}
@@ -208,10 +208,10 @@
 
 			var duty = value*0.1 + 10.0;
 
-			i2c_control.pwmDuty[0] = duty;
-			i2c_control.pwmDuty[1] = duty;
-			i2c_control.pwmDuty[2] = duty;
-			i2c_control.pwmDuty[3] = duty;
+			i2c_control.data[0] = duty;
+			i2c_control.data[1] = duty;
+			i2c_control.data[2] = duty;
+			i2c_control.data[3] = duty;
 		}
 	</script>
 	
