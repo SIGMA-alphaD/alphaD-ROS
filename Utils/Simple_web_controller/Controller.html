@@ -36,8 +36,9 @@
 	<script src="/static/js/roslib.js"></script>
 
 	<script>
+		var myurl = "ws://" + window.location.hostname + ":9090";
 		var ros = new ROSLIB.Ros({
-			url : 'ws://192.168.0.53:9090'
+			url : myurl
 		});
 
 		ros.on('connection', function(){
