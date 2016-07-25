@@ -75,13 +75,11 @@ SerialComm::open(const std::string& portStr, int baudrate)
         return false;
     }
 
-    ros::NodeHandle nh("px4flow");
+    ros::NodeHandle nh("info");
 
     // set up publishers
     m_optFlowPub = nh.advertise<px_comm::OpticalFlow>("opt_flow", 5);
 
-    //image_transport::ImageTransport it(nh);
-    //m_imagePub = it.advertise("camera_image", 5);
 
     // set up thread to asynchronously read data from serial port
     readStart(1000);
@@ -220,21 +218,6 @@ SerialComm::readCallback(const boost::system::error_code& error, size_t bytesTra
 
                 memcpy(&m_imageBuffer[pos], img.data, bytesToCopy);
 
-                if (seq + 1 == m_imagePackets)
-                {
-                    sensor_msgs::Image image;
-                    image.header.frame_id = m_frameId;
-                    image.height = m_imageHeight;
-                    image.width = m_imageWidth;
-                    image.encoding = sensor_msgs::image_encodings::MONO8;
-                    image.is_bigendian = false;
-                    image.step = m_imageWidth;
-
-                    image.data.resize(m_imageSize);
-                    memcpy(&image.data[0], &m_imageBuffer[0], m_imageSize);
-
-                    //m_imagePub.publish(image);
-                }
                 break;
             }
             }

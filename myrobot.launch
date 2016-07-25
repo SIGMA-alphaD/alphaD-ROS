@@ -2,5 +2,10 @@
 	<node pkg="i2c_master" type="i2c_run" name="i2c_run"/>
 	<node pkg="spi_master" type="spi_run" name="spi_run"/>
 	<node pkg="imu_filter" type="imu_filter_run" name="imu_filter_run"/>
+
+    <node name="px4flow" pkg="px4flow" type="px4flow_node" output="screen" respawn="true" clear_params="true">
+        <rosparam file="$(find px4flow)/launch/px4flow_parameters.yaml"/>
+    </node>
+
 	<node pkg="rosbridge_server" type="rosbridge_websocket" name="rosbridge_websocket"/>
 </launch>

@@ -1,0 +1,219 @@
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+   <!--<meta charset="utf-8"> -->
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>Simple Web Controller</title>
+
+	<link rel="stylesheet" href="/static/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/static/css/jquery-ui.min.css">
+
+	<style>
+		#eq > span {
+			display:block;margin:40px
+		}
+
+		#connectivity{
+			color : red;
+			font-weight : bold;
+		}
+
+		#batteryVolt{
+			color : red;
+			font-weight : bold;
+		}
+	</style>
+
+	<script src="/static/js/bootstrap.min.js"></script>
+	<script src="/static/js/eventemitter2.js"></script>
+
+	<script src="/static/js/jquery-3.1.0.min.js"></script>
+	<script src="/static/js/jquery-ui.min.js"></script>
+	<script src="/static/js/jquery.ui.touch-punch.min.js"></script>
+
+	<script src="/static/js/roslib.js"></script>
+
+	<script>
+		var myurl = "ws://" + window.location.hostname + ":9090";
+		var ros = new ROSLIB.Ros({
+			url : myurl
+		});
+
+		ros.on('connection', function(){
+			$("#connectivity").text("Connect.").css("color", "blue");
+		});
+
+		ros.on('close', function(){
+			$("#connectivity").text("Disconnect.").css("color", "red");
+		});
+
+		var i2c_listener = new ROSLIB.Topic({
+			ros : ros,
+			name : '/info/battery',
+			messageType : 'std_msgs/Float32'
+		});
+
+		i2c_listener.subscribe(function(message){
+			$("#batteryVolt").text(message.data.toFixed(3) + " V");
+		});
+
+		var i2c_publisher = new ROSLIB.Topic({
+			ros : ros,
+			name : '/control/pwm',
+			messageType : 'std_msgs/Float32MultiArray'
+		});
+
+		var i2c_control = {
+			data : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+		};
+		
+		i2c_publisher.publish(new ROSLIB.Message(i2c_control));
+	</script>
+
+	<script>
+		$(function(){
+			$( "#eq > span" ).each(function() {
+			  // read initial values from markup and remove that
+			  var value = parseInt( $( this ).text(), 10 );
+			  $( this ).empty().slider({
+					value: value,
+					range: "min",
+					animate: true,
+					orientation: "horizontal",
+					slide: function(event, ui){
+						var slide_num = $(this).attr("order");
+						var value = ui.value;
+						i2c_control.data[slide_num] = 0.1*value + 10.0;
+						i2c_publisher.publish(new ROSLIB.Message(i2c_control));
+					},
+					change : function(event, ui){
+						var slide_num = $(this).attr("order");
+						var value = ui.value;
+						i2c_control.data[slide_num] = 0.1*value + 10.0;
+						i2c_publisher.publish(new ROSLIB.Message(i2c_control));						
+					}
+			  });
+			});
+		});
+	</script>
+</head>
+<body>
+	<nav class="navbar navbar-default">
+	  <div class="container-fluid">
+		<div class="navbar-header">
+		  <a class="navbar-brand" href="#">
+		    Simple Web Controller
+		  </a>
+		</div>
+	  </div>
+	</nav>
+
+	<div class="container">
+		<div class="row">
+			<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
+			  Connection
+			</p>
+			
+			<h3 id="connectivity">
+				Disconnect.
+			</h3>
+
+			<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
+			  Motor Control
+			</p>
+
+			<div id="eq">
+				<span id="eq1" order=0>0</span>
+				<span id="eq2" order=1>0</span>
+				<span id="eq3" order=2>0</span>
+				<span id="eq4" order=3>0</span>
+			</div>
+			
+			<div class="btn-group" role="group" style="margin: 15px; margin-top:0">
+				<button type="button" class="btn btn-primary" id="esc_on" onclick="escOn()">ESC ON</button>
+				<button type="button" class="btn btn-danger" id="esc_off" onclick="escOff()">ESC OFF</button>
+			</div>
+
+			<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
+			  Battery State
+			</p>
+			
+			<h3 id="batteryVolt"></h3>
+
+		</div>
+	</div>
+
+	<script>
+		function escOn(){
+			if(!$("#esc_on").hasClass("disabled")){
+				// Disable controllers
+				$("#esc_on").text("WAIT...").toggleClass("disabled");
+				$("#eq > span").each(function(){
+					$(this).slider({ disabled : true});
+					$(this).slider("value", 0);
+				});
+
+				// ESC Off 
+				escOff();
+				
+			// T +1s
+			setTimeout(function(){
+				// Full Throttle
+				moveTogether(100);
+				i2c_publisher.publish(new ROSLIB.Message(i2c_control));
+			
+			}, 1000);
+
+			// T + 2s
+			setTimeout(function(){
+				// Turn On
+				i2c_control.data[4] = 100;
+				i2c_publisher.publish(new ROSLIB.Message(i2c_control));
+			}, 2000);
+
+			// T + 10s
+			setTimeout(function(){
+				// Down Throttle
+				moveTogether(0);
+				i2c_publisher.publish(new ROSLIB.Message(i2c_control));;
+			}, 10000);
+
+			// T + 15s
+			setTimeout(function(){;
+				$("#esc_on").text("ESC ON").toggleClass("disabled");
+				$("#eq > span").each(function(){
+					$(this).slider({ disabled : false});
+				});
+			}, 15000);
+
+			}
+	
+		}
+
+		function escOff(){
+			var i;
+			for(i=0;i<8;i++)
+				i2c_control.data[i] = 0.0;
+
+			i2c_publisher.publish(new ROSLIB.Message(i2c_control));
+		}
+
+		function moveTogether(value){
+			if(value > 100)
+				value = 100;
+			else if(value < 0)
+				value = 0;
+
+			var duty = value*0.1 + 10.0;
+
+			i2c_control.data[0] = duty;
+			i2c_control.data[1] = duty;
+			i2c_control.data[2] = duty;
+			i2c_control.data[3] = duty;
+		}
+	</script>
+	
+</body>
+</html>

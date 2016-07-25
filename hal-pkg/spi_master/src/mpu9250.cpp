@@ -87,29 +87,29 @@ float* mpu9250::handler::Read(){
     mpu9250Reads(0x3B, buffer, 6);
     temp = ((short)buffer[1] << 8) | buffer[2];
     data = (float)temp/16384*9.81;
-    mpu9250_data[0] = -data;	
+    mpu9250_data[0] = data;	
 
     temp = ((short)buffer[3] << 8) | buffer[4];
     data = (float)temp/16384*9.81;
-    mpu9250_data[1] = data;
+    mpu9250_data[1] = -data;
     
     temp = ((short)buffer[5] << 8) | buffer[6];
     data = (float)temp/16384*9.81;
-    mpu9250_data[2] = data;   
+    mpu9250_data[2] = -data;   
 
 	// Gyroscope Measurements (Right hand coordinate, +-2000dps)
     mpu9250Reads(0x43, buffer, 6);
     temp = ((short)buffer[1] << 8) | buffer[2];
     data = (float)temp/32.8*3.14/180;
-    mpu9250_data[3] = data;
+    mpu9250_data[3] = -data;
 
     temp = ((short)buffer[3] << 8) | buffer[4];
     data = (float)temp/32.8*3.14/180;
-    mpu9250_data[4] = -data;
+    mpu9250_data[4] = data;
     
     temp = ((short)buffer[5] << 8) | buffer[6];
     data = (float)temp/32.8*3.14/180;	
-	mpu9250_data[5] = -data;
+	mpu9250_data[5] = data;
 
 	// Magnetometer measurements
     mpu9250Write(AK8963_I2C_ADDR | READ_FLAG, MPUREG_I2C_SLV0_ADDR); //Set the I2C slave addres of AK8963 and set for read.
