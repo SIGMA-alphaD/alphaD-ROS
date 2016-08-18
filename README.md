@@ -15,7 +15,7 @@ alphaD ROS Packages
   * **Subscribing Message**
     * /control/pwm
     * type : std_msgs/Float32MultiArray
-    * description : 해당 토픽으로 0~100 까지의 실수행렬을 보내면 각각에 해당하는 채널에 pwm이 generate 된다.
+    * description : 해당 토픽으로 0~100 까지의 실수행렬(길이는 8)을 보내면 각각에 해당하는 채널에 pwm이 generate 된다.
     * example : [20.0, 20.0, 20.0, 20.0, 100.0, 0, 0, 0]
 
 * [spi_master](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/hal-pkg/spi_master)
