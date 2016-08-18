@@ -9,19 +9,32 @@ alphaD ROS Packages
 * [i2c_master](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/hal-pkg/i2c_master)
   * 쉴드에 i2c로 연결되어 있는 pca9685(16-channel pwm generator)과 ads1115(16bit ADC module)을 컨트롤 하는 모듈
   * Publishing Message
-   * /info/battery
+    * /info/battery
+    * type : std_msgs/Float32
+    * description : 현재 배터리의 전압을 나타낸다.
   * Subscribing Message
-   * /control/pwm
+    * /control/pwm
+    * type : std_msgs/Float32MultiArray
+    * description : 해당 토픽으로 0~100 까지의 실수행렬을 보내면 각각에 해당하는 채널에 pwm이 generate 된다.
+    * example : [20.0, 20.0, 20.0, 20.0, 100.0, 0, 0, 0]
 
-* [spi_master](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/alphad-ros-pkg/sensor-pkg/px-ros-pkg)
-  * px4flow 옵티컬 플로우 센서로부터 값을 받아오는 노드
+* [spi_master](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/hal-pkg/spi_master)
+  * 쉴드에 spi로 연결되어 있는 mpu9250과 통신하는 모듈
+  * Publishing Message
+    * /info/imu/data_raw
+    * type : sensor_msgs/Imu
+    * description : mpu9250으로 받은 가속도(m/s)와 각속도(rad/s)의 값을 퍼블리시 한다.
 
 ### 1.2. control-pkg
 - - -
 로봇 컨트롤에 관련된 패키지들
-* [ahrs_pkg](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/alphad-ros-pkg/control-pkg/ahrs_pkg)
-  * IMU 데이터를 통해 오일러 각을 추정하는 노드
-  
+* [imu_filter](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/control-pkg/imu_filter)
+  * spi_master 노드를 통해 퍼블리시 된 /info/imu/data_raw를 subscribe하여 필터링된 quaternion을 publish 한다.
+  * Publishing Message
+    * /info/imu
+    * type : sensor_msgs/Imu
+    * description : madgwick 알고리즘을 이용해 필터링된 quaternion값을 퍼블리시 한다.
+
 ### 1.3. www-pkg
 - - -
 웹 어플리케이션 관련 패키지들
