@@ -3,13 +3,17 @@ alphaD ROS Packages
 
 1. 구성
 ------------------
-### 1.1. sensor-pkg
+### 1.1. hal-pkg
 - - -
 센서값을 받아오는데 관련된 패키지들
-* [imu_baro_pkg](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/alphad-ros-pkg/sensor-pkg/imu_baro_pkg)
-  * 쉴드에 부착되어 있는 MPU9250(IMU) 과 MS5611(Barometer) 로부터 값을 받아오는 노드
+* [i2c_master](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/hal-pkg/i2c_master)
+  * 쉴드에 i2c로 연결되어 있는 pca9685(16-channel pwm generator)과 ads1115(16bit ADC module)을 컨트롤 하는 모듈
+  * Publishing Message
+   * /info/battery
+  * Subscribing Message
+   * /control/pwm
 
-* [px-ros-pkg](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/alphad-ros-pkg/sensor-pkg/px-ros-pkg)
+* [spi_master](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/alphad-ros-pkg/sensor-pkg/px-ros-pkg)
   * px4flow 옵티컬 플로우 센서로부터 값을 받아오는 노드
 
 ### 1.2. control-pkg
