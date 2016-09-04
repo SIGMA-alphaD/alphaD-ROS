@@ -1,5 +1,6 @@
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
+#include <stdint.h>
 
 #include "spi_master/mpu9250.h"
 
