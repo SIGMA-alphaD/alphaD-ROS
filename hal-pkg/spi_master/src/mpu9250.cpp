@@ -176,28 +176,28 @@ float* mpu9250::handler::Read(){
     mpu9250Reads(0x3B, buffer, 6);
     temp = ((short)buffer[1] << 8) | buffer[2];
     data = (float)temp/acc_divider;
-    mpu9250_data[0] = data;	
+    mpu9250_data[0] = data - a_bias[0];	
 
     temp = ((short)buffer[3] << 8) | buffer[4];
     data = (float)temp/acc_divider;
-    mpu9250_data[1] = data;
+    mpu9250_data[1] = data - a_bias[1];
     
     temp = ((short)buffer[5] << 8) | buffer[6];
     data = (float)temp/acc_divider;
-    mpu9250_data[2] = data;   
+    mpu9250_data[2] = data - a_bias[2];   
 
 	// Gyroscope Measurements (+-1000dps)
     mpu9250Reads(0x43, buffer, 6);
     temp = ((short)buffer[1] << 8) | buffer[2];
-    data = (float)temp/gyro_divider*3.14/180;
+    data = ((float)temp/gyro_divider - g_bias[0])*3.14/180;
     mpu9250_data[3] = data;
 
     temp = ((short)buffer[3] << 8) | buffer[4];
-    data = (float)temp/gyro_divider*3.14/180;
+    data = ((float)temp/gyro_divider - g_bias[1])*3.14/180;
     mpu9250_data[4] = data;
     
     temp = ((short)buffer[5] << 8) | buffer[6];
-    data = (float)temp/gyro_divider*3.14/180;	
+    data = ((float)temp/gyro_divider - g_bias[2])*3.14/180;	
 	mpu9250_data[5] = data;
 
 /*
