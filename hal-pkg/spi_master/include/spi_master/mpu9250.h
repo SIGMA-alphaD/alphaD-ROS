@@ -195,6 +195,7 @@ namespace mpu9250{
 			float g_bias[3];
     			float a_bias[3];      // Bias corrections for gyro and accelerometer
 			float mpu9250_data[9];
+			void mpu9250::handler::calibrate(float *dest1, float *dest2);
 			unsigned int set_acc_scale(int scale);
 			unsigned int set_gyro_scale(int scale);
 			unsigned char mpu9250Read(unsigned char regNum);
