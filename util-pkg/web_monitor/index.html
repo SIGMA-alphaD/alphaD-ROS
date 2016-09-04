@@ -60,12 +60,12 @@ _height = new Array(50).fill(0);
 
   var ahrsListner = new ROSLIB.Topic({
     ros :ros,
-    name : '/imu/Quaternion',
-    messageType : 'geometry_msgs/Quaternion'
+    name : '/info/imu/data',
+    messageType : 'sensor_msgs/Imu'
   });
 
   ahrsListner.subscribe(function(message){
-    _q = [message.w, message.x, message.y, message.z];
+    _q = [message.orientation.w, message.orientation.x, message.orientation.y, message.orientation.z];
     _rVect = [-_q[2], _q[3], -_q[1]];
     _rCube = -Math.acos(_q[0])*2;
 
@@ -107,7 +107,7 @@ _height = new Array(50).fill(0);
 
   var batteryListner = new ROSLIB.Topic({
     ros: ros,
-    name: '/info/batteryVolt',
+    name: '/info/battery',
     messageType : 'std_msgs/Float32'
   });
 
