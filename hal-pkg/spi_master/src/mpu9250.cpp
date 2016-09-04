@@ -15,7 +15,7 @@ int mpu9250::handler::Setup(void){
         //{0x80, MPUREG_PWR_MGMT_1}, // Reset
         {0x01, MPUREG_PWR_MGMT_1}, // Auto select clock source
         {0x00, MPUREG_PWR_MGMT_2}, // Acc & Gyro enable
-        {0x16, MPUREG_GYRO_CONFIG}, // +-1000dps
+        {0x10, MPUREG_GYRO_CONFIG}, // +-1000dps
         {0x00, MPUREG_ACCEL_CONFIG}, // +-2G
         {0x30, MPUREG_INT_PIN_CFG},
         //{0x40, MPUREG_I2C_MST_CTRL},   // I2C Speed 348 kHz
@@ -83,7 +83,7 @@ float* mpu9250::handler::Read(){
     short temp;
     float data;
 
-	// Accelerometer Measurements (Right hand coordinate)
+	// Accelerometer Measurements (+-2g)
     mpu9250Reads(0x3B, buffer, 6);
     temp = ((short)buffer[1] << 8) | buffer[2];
     data = (float)temp/16384*9.81;
@@ -97,7 +97,7 @@ float* mpu9250::handler::Read(){
     data = (float)temp/16384*9.81;
     mpu9250_data[2] = data;   
 
-	// Gyroscope Measurements (Right hand coordinate, +-2000dps)
+	// Gyroscope Measurements (+-1000dps)
     mpu9250Reads(0x43, buffer, 6);
     temp = ((short)buffer[1] << 8) | buffer[2];
     data = (float)temp/32.8*3.14/180;
