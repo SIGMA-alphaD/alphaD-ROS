@@ -17,7 +17,7 @@ def callback(data):
     global _sampleRate
 
     if _prevT is not -1:
-        if (data.header.nsec - _prevT) >= 1000000.0/_sampleRate :
+        if (data.header.stamp.nsec - _prevT) >= 1000000.0/_sampleRate :
             acc = [data.linear_acceleration.x, data.linear_acceleration.y, data.linear_acceleration.z]
             gyro = [data.angular_velocity.x, data.angular_velocity.y, data.angular_velocity.z]
 
@@ -32,7 +32,7 @@ def callback(data):
             _pub.publish(msg)
             _prevT = _prevT + 1000000.0/_sampleRate
     else :
-        _prevT = data.header.nsec;
+        _prevT = data.header.stamp.nsec;
 
 def listener():
     rospy.init_node('imu_filter_run')
