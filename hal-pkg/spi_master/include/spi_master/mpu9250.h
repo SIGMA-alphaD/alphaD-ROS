@@ -191,6 +191,8 @@ namespace mpu9250{
 		private:
 			int fd;
 			float mpu9250_data[9];
+			unsigned int set_acc_scale(int scale);
+			unsigned int set_gyro_scale(int scale);
 			unsigned char mpu9250Read(unsigned char regNum);
 			void mpu9250Reads(unsigned char regNum, unsigned char* readBuf, int Bytes);
 			void mpu9250Write(unsigned char value, unsigned char regNum);
