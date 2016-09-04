@@ -1,0 +1,16 @@
+#!/usr/bin/env python 
+
+import rospy
+import chung_control.chung_control_node as control_package
+
+
+if __name__=='__main__':
+	print("...Chung_Control Start...")
+	
+	#initializing automatically
+	#if you want to do this in hand, remake below line 	
+	control_package.esc_init()
+
+	control_package.listener()
+
+
