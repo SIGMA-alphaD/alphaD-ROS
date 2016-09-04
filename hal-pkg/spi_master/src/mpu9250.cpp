@@ -71,7 +71,7 @@ int mpu9250::handler::Setup(void){
 
 unsigned int MPU9250::handler::set_acc_scale(int scale){
     unsigned int temp_scale;
-    WriteReg(MPUREG_ACCEL_CONFIG, scale);
+    mpu9250Write(scale, MPUREG_ACCEL_CONFIG);
     
     switch (scale){
         case BITS_FS_2G:
@@ -87,7 +87,7 @@ unsigned int MPU9250::handler::set_acc_scale(int scale){
             acc_divider=2048;
         break;   
     }
-    temp_scale = WriteReg(MPUREG_ACCEL_CONFIG|READ_FLAG, 0x00);
+    temp_scale = mpu9250Read(MPUREG_ACCEL_CONFIG);
     
     switch (temp_scale){
         case BITS_FS_2G:
@@ -118,7 +118,7 @@ unsigned int MPU9250::handler::set_acc_scale(int scale){
 
 unsigned int MPU9250::handler::set_gyro_scale(int scale){
     unsigned int temp_scale;
-    WriteReg(MPUREG_GYRO_CONFIG, scale);
+    mpu9250Write(scale, MPUREG_GYRO_CONFIG);
 
     switch (scale){
         case BITS_FS_250DPS:   gyro_divider = 131;  break;
@@ -127,7 +127,7 @@ unsigned int MPU9250::handler::set_gyro_scale(int scale){
         case BITS_FS_2000DPS:  gyro_divider = 16.4; break;   
     }
 
-    temp_scale = WriteReg(MPUREG_GYRO_CONFIG|READ_FLAG, 0x00);
+    temp_scale = mpu9250Read(MPUREG_GYRO_CONFIG);
 
     switch (temp_scale){
         case BITS_FS_250DPS:   temp_scale = 250;    break;
