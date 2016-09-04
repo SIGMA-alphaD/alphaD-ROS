@@ -4,7 +4,7 @@ import madgwick_filter
 from sensor_msgs.msg import Imu
 
 _pub = rospy.Publisher('info/imu/data', Imu, queue_size = 10)
-_sampleRate = 400 # 400Hz
+_sampleRate = 300 # 300Hz
 
 _Filter = madgwick_filter.MadgwickAHRS(1.0/_sampleRate)
 
