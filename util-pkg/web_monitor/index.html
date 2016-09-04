@@ -33,7 +33,7 @@ _height = new Array(50).fill(0);
 <script type="text/javascript" src="/static/js/roslib.js"></script>
 
 <script>
-  var myurl = "ws://" + window.location.hostname + ":9090";
+  var myurl = "ws://" + window.location.hostname + ":322";
   var ros = new ROSLIB.Ros({
     url : myurl
   });
@@ -81,10 +81,10 @@ _height = new Array(50).fill(0);
   controlListner.subscribe(function(message){
     $("#item2").text("["+message.data[0].toFixed(2)+", " + message.data[1].toFixed(2) + ", " + message.data[2].toFixed(2) + ", " + message.data[3].toFixed(2) + ", " + message.data[4].toFixed(2) + "]");
 
-    $('#dial1').val(lin_map(20, 80, 0, 100, message.data[0])).trigger('change');
-    $('#dial2').val(lin_map(20, 80, 0, 100, message.data[1])).trigger('change');
-    $('#dial3').val(lin_map(20, 80, 0, 100, message.data[2])).trigger('change');
-    $('#dial4').val(lin_map(20, 80, 0, 100, message.data[3])).trigger('change');
+    $('#dial1').val(lin_map(10, 20, 0, 100, message.data[0])).trigger('change');
+    $('#dial2').val(lin_map(10, 20, 0, 100, message.data[1])).trigger('change');
+    $('#dial3').val(lin_map(10, 20, 0, 100, message.data[2])).trigger('change');
+    $('#dial4').val(lin_map(10, 20, 0, 100, message.data[3])).trigger('change');
 
     if(message.data[4] > 70){
       $("#esc_stat_div").removeClass("text-danger");
@@ -439,3 +439,4 @@ path {
 </body>
 
 </html>
+
