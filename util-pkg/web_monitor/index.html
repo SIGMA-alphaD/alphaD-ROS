@@ -138,7 +138,7 @@ _height = new Array(50).fill(0);
     _height.shift();
     height_graph.attr("d", valueline2(_height));
 
-    y2.domain([0, d3.max(_height, function(d){ return d})]);
+    //y2.domain([0, d3.max(_height, function(d){ return d})]);
     y2_graph.call(yAxis2);
   });
 </script>
@@ -418,7 +418,7 @@ path {
                        .attr("transform","translate(" + margin.left + "," + margin.top + ")");
 
           x2.domain(d3.extent(_height, function(d,i) { return i; }));
-          y2.domain([0, d3.max(_height, function(d){ return d})]);
+          y2.domain([0, 30]);
 
           var height_graph =svg2.append("path").attr("class", "line")
                              .attr("d", valueline2(_height));
