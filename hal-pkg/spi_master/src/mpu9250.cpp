@@ -10,7 +10,7 @@ mpu9250::handler::handler(){
 
 #define MPU_InitRegNum 17
 int mpu9250::handler::Setup(void){
-    calibrate(g_bias, a_bias);
+    //calibrate(g_bias, a_bias);
     int i;
 
     unsigned char MPU_Init_Data[MPU_InitRegNum][2] ={
