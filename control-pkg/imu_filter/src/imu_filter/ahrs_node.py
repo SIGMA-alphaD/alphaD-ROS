@@ -25,9 +25,9 @@ def callback(data):
             msg = Imu()
             msg.header.frame_id = "imu"
             msg.orientation.w = _Filter.quaternion._q[0]
-            msg.orientation.x = _Filter.quaternion._q[1]
-            msg.orientation.y = _Filter.quaternion._q[2]
-            msg.orientation.z = _Filter.quaternion._q[3]
+            msg.orientation.x = -_Filter.quaternion._q[1]
+            msg.orientation.y = -_Filter.quaternion._q[2]
+            msg.orientation.z = -_Filter.quaternion._q[3]
 
             _pub.publish(msg)
             _prevT = _prevT + 1000.0/_sampleRate
