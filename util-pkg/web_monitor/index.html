@@ -11,7 +11,7 @@ _rCube = 0;
 _rVect = [1, 0, 0];
 _control = [0.0, 0.0, 0.0, 0.0, 0.0];
 _battery = new Array(50).fill(0);
-_height = new Array(50).fill(0);
+_height = new Array(100).fill(0);
 </script>
 
 <script type="text/javascript" src="/static/js/jquery-2.2.4.min.js"></script>
@@ -33,7 +33,7 @@ _height = new Array(50).fill(0);
 <script type="text/javascript" src="/static/js/roslib.js"></script>
 
 <script>
-  var myurl = "ws://" + window.location.hostname + ":9090";
+  var myurl = "ws://" + window.location.hostname + ":322";
   var ros = new ROSLIB.Ros({
     url : myurl
   });
@@ -81,10 +81,10 @@ _height = new Array(50).fill(0);
   controlListner.subscribe(function(message){
     $("#item2").text("["+message.data[0].toFixed(2)+", " + message.data[1].toFixed(2) + ", " + message.data[2].toFixed(2) + ", " + message.data[3].toFixed(2) + ", " + message.data[4].toFixed(2) + "]");
 
-    $('#dial1').val(lin_map(20, 80, 0, 100, message.data[0])).trigger('change');
-    $('#dial2').val(lin_map(20, 80, 0, 100, message.data[1])).trigger('change');
-    $('#dial3').val(lin_map(20, 80, 0, 100, message.data[2])).trigger('change');
-    $('#dial4').val(lin_map(20, 80, 0, 100, message.data[3])).trigger('change');
+    $('#dial1').val(lin_map(10, 20, 0, 100, message.data[0])).trigger('change');
+    $('#dial2').val(lin_map(10, 20, 0, 100, message.data[1])).trigger('change');
+    $('#dial3').val(lin_map(10, 20, 0, 100, message.data[2])).trigger('change');
+    $('#dial4').val(lin_map(10, 20, 0, 100, message.data[3])).trigger('change');
 
     if(message.data[4] > 70){
       $("#esc_stat_div").removeClass("text-danger");
@@ -125,6 +125,23 @@ _height = new Array(50).fill(0);
   function lin_map(min_a, max_a, min_b, max_b, x){
     return (max_b-min_b)/(max_a-min_a)*(x-min_a) + min_b;
   }
+  
+  var px4flowListner = new ROSLIB.Topic({
+    ros: ros,
+    name: '/info/opt_flow',
+    messageType : 'px_comm/OpticalFlow'
+  });
+  
+  px4flowListner.subscribe(function(message){
+    $("#item4").text(message.ground_distance.toFixed(5));
+    $("#item5").text("[" + message.flow_x.toFixed(3) + ", " + message.flow_y.toFixed(3) + "]");
+    _height.push(message.ground_distance);
+    _height.shift();
+    height_graph.attr("d", valueline2(_height));
+
+    //y2.domain([0, d3.max(_height, function(d){ return d})]);
+    y2_graph.call(yAxis2);
+  });
 </script>
 <!-- roslibjs end-------------------------------------------------------------->
 
@@ -402,7 +419,7 @@ path {
                        .attr("transform","translate(" + margin.left + "," + margin.top + ")");
 
           x2.domain(d3.extent(_height, function(d,i) { return i; }));
-          y2.domain([0, d3.max(_height, function(d){ return d})]);
+          y2.domain([0, 30]);
 
           var height_graph =svg2.append("path").attr("class", "line")
                              .attr("d", valueline2(_height));
@@ -439,3 +456,4 @@ path {
 </body>
 
 </html>
+
