@@ -125,6 +125,16 @@ _height = new Array(50).fill(0);
   function lin_map(min_a, max_a, min_b, max_b, x){
     return (max_b-min_b)/(max_a-min_a)*(x-min_a) + min_b;
   }
+  
+  var px4flowListner = new ROSLIB.Topic({
+    ros: ros,
+    name: '/info/opt_flow',
+    messageType : 'px_comm/OpticalFlow'
+  });
+  
+  px4flowListner.subscribe(function(message){
+    $("#item4").text(message.ground_distance.toFixed(5));
+  });
 </script>
 <!-- roslibjs end-------------------------------------------------------------->
 
