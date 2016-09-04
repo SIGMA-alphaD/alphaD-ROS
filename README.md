@@ -31,7 +31,7 @@ alphaD ROS Packages
 * [imu_filter](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/control-pkg/imu_filter)
   * spi_master 노드를 통해 퍼블리시 된 /info/imu/data_raw를 subscribe하여 필터링된 quaternion을 publish 한다.
   * **Publishing Message**
-    * /info/imu
+    * /info/imu/data
     * type : sensor_msgs/Imu
     * description : madgwick 알고리즘을 이용해 필터링된 quaternion값을 퍼블리시 한다.
 
