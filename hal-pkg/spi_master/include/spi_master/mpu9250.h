@@ -190,6 +190,8 @@ namespace mpu9250{
 
 		private:
 			int fd;
+			float acc_divider;
+			float gyro_divider;
 			float mpu9250_data[9];
 			unsigned int set_acc_scale(int scale);
 			unsigned int set_gyro_scale(int scale);
