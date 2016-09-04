@@ -11,7 +11,7 @@ _rCube = 0;
 _rVect = [1, 0, 0];
 _control = [0.0, 0.0, 0.0, 0.0, 0.0];
 _battery = new Array(50).fill(0);
-_height = new Array(50).fill(0);
+_height = new Array(100).fill(0);
 </script>
 
 <script type="text/javascript" src="/static/js/jquery-2.2.4.min.js"></script>
@@ -134,6 +134,7 @@ _height = new Array(50).fill(0);
   
   px4flowListner.subscribe(function(message){
     $("#item4").text(message.ground_distance.toFixed(5));
+    $("#item5").text("[" + message.flow_x.toFixed(3) + ", " + message.flow_y.toFixed(3) + "]");
     _height.push(message.ground_distance);
     _height.shift();
     height_graph.attr("d", valueline2(_height));
