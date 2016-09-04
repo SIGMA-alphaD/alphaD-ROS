@@ -192,6 +192,8 @@ namespace mpu9250{
 			int fd;
 			float acc_divider;
 			float gyro_divider;
+			float g_bias[3];
+    			float a_bias[3];      // Bias corrections for gyro and accelerometer
 			float mpu9250_data[9];
 			unsigned int set_acc_scale(int scale);
 			unsigned int set_gyro_scale(int scale);
