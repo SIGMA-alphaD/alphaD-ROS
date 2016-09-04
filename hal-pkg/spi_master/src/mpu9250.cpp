@@ -69,7 +69,7 @@ int mpu9250::handler::Setup(void){
  * returns the range set (2,4,8 or 16)
  */
 
-unsigned int MPU9250::handler::set_acc_scale(int scale){
+unsigned int mpu9250::handler::set_acc_scale(int scale){
     unsigned int temp_scale;
     mpu9250Write(scale, MPUREG_ACCEL_CONFIG);
     
@@ -116,7 +116,7 @@ unsigned int MPU9250::handler::set_acc_scale(int scale){
  * returns the range set (250,500,1000 or 2000)
  */
 
-unsigned int MPU9250::handler::set_gyro_scale(int scale){
+unsigned int mpu9250::handler::set_gyro_scale(int scale){
     unsigned int temp_scale;
     mpu9250Write(scale, MPUREG_GYRO_CONFIG);
 
