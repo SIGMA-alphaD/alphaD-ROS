@@ -1,0 +1,441 @@
+<html>
+
+<head>
+<title>Alpha-D Web Monitor</title>
+<meta charset="utf-8">
+
+<script>
+// global variabels
+_q = [1, 0, 0, 0];
+_rCube = 0;
+_rVect = [1, 0, 0];
+_control = [0.0, 0.0, 0.0, 0.0, 0.0];
+_battery = new Array(50).fill(0);
+_height = new Array(50).fill(0);
+</script>
+
+<script type="text/javascript" src="/static/js/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.knob.js"></script>
+<!-- bootstrap----------------------------------------------------------------->
+<link rel="stylesheet" href="/static/css/bootstrap.min.css">
+<link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="/static/css/font-awesome.min.css">
+<style media="screen">
+  .table_item{
+    font-weight: bold;
+    color: blue;
+  }
+</style>
+<!-- bootstrap end------------------------------------------------------------->
+
+<!-- roslibjs------------------------------------------------------------------>
+<script type="text/javascript" src="/static/js/eventemitter2.js"></script>
+<script type="text/javascript" src="/static/js/roslib.js"></script>
+
+<script>
+  var myurl = "ws://" + window.location.hostname + ":9090";
+  var ros = new ROSLIB.Ros({
+    url : myurl
+  });
+
+  ros.on('connection', function(){
+      $("#ros_stat_div").removeClass("text-danger");
+      $("#ros_stat_div").addClass("text-success");
+
+      $("#ros_stat").removeClass("glyphicon-remove-sign");
+      $("#ros_stat").addClass("glyphicon-ok-sign");
+
+      $("#ros_stat_str").text("CONNECTED");
+  });
+
+  ros.on('close', function(){
+    $("#ros_stat_div").addClass("text-danger");
+    $("#ros_stat_div").removeClass("text-success");
+
+    $("#ros_stat").addClass("glyphicon-remove-sign");
+    $("#ros_stat").removeClass("glyphicon-ok-sign");
+
+    $("#ros_stat_str").text("DISCONNECTED");
+  });
+
+  var ahrsListner = new ROSLIB.Topic({
+    ros :ros,
+    name : '/imu/Quaternion',
+    messageType : 'geometry_msgs/Quaternion'
+  });
+
+  ahrsListner.subscribe(function(message){
+    _q = [message.w, message.x, message.y, message.z];
+    _rVect = [-_q[2], _q[3], -_q[1]];
+    _rCube = -Math.acos(_q[0])*2;
+
+    $("#item1").text("["+_q[0].toFixed(3)+", " + _q[1].toFixed(3) + ", " + _q[2].toFixed(3) + ", " + _q[3].toFixed(3) + "]");
+  });
+
+  var controlListner = new ROSLIB.Topic({
+    ros :ros,
+    name : '/control/pwm',
+    messageType :'std_msgs/Float32MultiArray'
+  });
+
+  controlListner.subscribe(function(message){
+    $("#item2").text("["+message.data[0].toFixed(2)+", " + message.data[1].toFixed(2) + ", " + message.data[2].toFixed(2) + ", " + message.data[3].toFixed(2) + ", " + message.data[4].toFixed(2) + "]");
+
+    $('#dial1').val(lin_map(20, 80, 0, 100, message.data[0])).trigger('change');
+    $('#dial2').val(lin_map(20, 80, 0, 100, message.data[1])).trigger('change');
+    $('#dial3').val(lin_map(20, 80, 0, 100, message.data[2])).trigger('change');
+    $('#dial4').val(lin_map(20, 80, 0, 100, message.data[3])).trigger('change');
+
+    if(message.data[4] > 70){
+      $("#esc_stat_div").removeClass("text-danger");
+      $("#esc_stat_div").addClass("text-success");
+
+      $("#esc_stat").removeClass("glyphicon-remove-sign");
+      $("#esc_stat").addClass("glyphicon-ok-sign");
+
+      $("#esc_stat_str").text("ESC ON");
+    }else{
+      $("#esc_stat_div").addClass("text-danger");
+      $("#esc_stat_div").removeClass("text-success");
+
+      $("#esc_stat").addClass("glyphicon-remove-sign");
+      $("#esc_stat").removeClass("glyphicon-ok-sign");
+
+      $("#esc_stat_str").text("ESC OFF");
+    }
+  });
+
+  var batteryListner = new ROSLIB.Topic({
+    ros: ros,
+    name: '/info/batteryVolt',
+    messageType : 'std_msgs/Float32'
+  });
+
+  batteryListner.subscribe(function(message){
+    $("#item3").text(message.data.toFixed(3));
+    _battery.push(message.data);
+    _battery.shift();
+    bat_graph.attr("d", valueline1(_battery));
+
+    y1.domain([0, d3.max(_battery, function(d){ return d})]);
+    y1_graph.call(yAxis1);
+  });
+
+
+  function lin_map(min_a, max_a, min_b, max_b, x){
+    return (max_b-min_b)/(max_a-min_a)*(x-min_a) + min_b;
+  }
+</script>
+<!-- roslibjs end-------------------------------------------------------------->
+
+<!-- Web gl ------------------------------------------------------------------->
+<script type="text/javascript" src="/static/js/glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="/static/js/webgl-utils.js"></script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec4 vColor;
+    void main(void) {
+        gl_FragColor = vColor;
+    }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec4 aVertexColor;
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    varying vec4 vColor;
+    void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vColor = aVertexColor;
+    }
+</script>
+<script type="text/javascript" src="/static/js/rCube.js"></script>
+<!-- Web gl end---------------------------------------------------------------->
+
+<!-- d3.js -------------------------------------------------------------------->
+<script src="/static/js/d3.v3.min.js"></script>
+<style>
+path {
+  stroke: blue;
+  stroke-width: 2;
+  fill: none;
+}
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    stroke-width:1;
+    shape-rendering: crispEdges;
+}
+.tick line{
+  opacity: 0.2;
+}
+</style>
+<!-- d3.js end ---------------------------------------------------------------->
+
+</head>
+
+
+<body onload="webGLStart();">
+
+  <nav class="navbar navbar-default">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">
+          Alpha-D Web Monitor
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <nav class="navbar navbar-inverse navbar-fixed-bottom">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        2016 SIGMA INTELLIGENCE
+      </a>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-8">
+        <!-- 1 -->
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            ROS STATE
+          </div>
+          <div id="ros_stat_div" class="panel-body text-right text-danger" style="font-weight:bold;">
+              <span id="ros_stat_str">DISCONNECTED</span>
+              <span id="ros_stat" class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <!-- 2 -->
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            CONTROL INPUTS
+          </div>
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-md-3">
+                <input type="text" value="0" class="dial" id="dial1" data-width="200" data-fgColor="#222222" readonly>
+              </div>
+              <div class="col-md-3">
+                <input type="text" value="0" class="dial" id="dial2" data-width="200" data-fgColor="#222222" readonly>
+              </div>
+              <div class="col-md-3">
+                <input type="text" value="0" class="dial" id="dial3" data-width="200" data-fgColor="#222222" readonly>
+              </div>
+              <div class="col-md-3">
+                <input type="text" value="0" class="dial" id="dial4" data-width="200" data-fgColor="#222222" readonly>
+              </div>
+            </div>
+
+            <div id="esc_stat_div" class="text-right text-danger" style="font-weight:bold;">
+              <span id="esc_stat_str">ESC OFF</span>
+              <span id="esc_stat" class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+            </div>
+
+          </div>
+
+        </div>
+
+        <script>
+          $(".dial").knob({
+            'min':0,
+            'max':100
+          });
+        </script>
+
+        <!-- 3 -->
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            SYSTEM INFORMATION
+          </div>
+          <div class="panel-body">
+            <div class="row" id="graph_area">
+              <div class="col-md-4" id="bat_stat_div"></div>
+
+              <div class="col-md-4" id="height_stat_div"></div>
+
+              <div class="col-md-4">
+                <table class="table table-striped">
+                  <tr>
+                    <th colspan=2>
+                      Summary
+                    </th>
+                  </tr>
+                  <tr>
+                    <td>
+                      Quaternion
+                    </td>
+                    <td class="table_item">
+                      <span id="item1">[0, 0, 0, 0]</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Control Inputs
+                    </td>
+                    <td class="table_item">
+                      <span id="item2">[0, 0, 0, 0, 0]</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Battery
+                    </td>
+                    <td class="table_item">
+                      <span id="item3">0.0</span>
+                      <span> V</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Height
+                    </td>
+                    <td class="table_item">
+                      <span id="item4">0.0</span>
+                      <span> cm</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Optical Flow
+                    </td>
+                    <td class="table_item">
+                      <span id="item5">[0, 0]</span>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <script>
+          var margin = {top: 20, right: 20, bottom: 30, left: 40},
+            width = 350 - margin.left - margin.right,
+            height = 300 - margin.top - margin.bottom;
+
+          var x1 = d3.scale.linear().range([0,width]);
+          var y1 = d3.scale.linear().range([height,0]);
+
+          //var yAxis1 = d3.svg.axis().scale(y1).orient("left").ticks(10, "V");
+          var yAxis1 = d3.svg.axis()
+                         .scale(y1)
+                         .orient("left")
+                         .innerTickSize(-width)
+                         .outerTickSize(0)
+                         .tickPadding(10);
+
+         var xAxis1 = d3.svg.axis()
+                        .scale(x1)
+                        .orient("bottom")
+                        .innerTickSize(-height)
+                        .outerTickSize(0)
+                        .tickPadding(10)
+                        .tickFormat("");
+
+          var valueline1 = d3.svg.line()
+                            .x(function(d,i){ return x1(i); })
+                            .y(function(d){ return y1(d); });
+
+          var svg1 = d3.select("#bat_stat_div").append("svg")
+                       .attr("width", width + margin.left + margin.right)
+                       .attr("height",height + margin.top + margin.bottom)
+                       .append('g')
+                       .attr("transform","translate(" + margin.left + "," + margin.top + ")");
+
+          x1.domain(d3.extent(_battery, function(d,i) { return i; }));
+          y1.domain([0, d3.max(_battery, function(d){ return d})]);
+
+          var bat_graph =svg1.append("path").attr("class", "line")
+                             .attr("d", valueline1(_battery));
+
+          var y1_graph = svg1.append("g")
+              .attr("class", "y axis")
+              .call(yAxis1);
+
+          svg1.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + height + ")")
+              .call(xAxis1);
+
+          svg1.append("text")
+              .attr("transform","translate(" + (width/2) + " ," + (height+margin.bottom-10) + ")")
+              .style("text-anchor", "middle")
+              .text("BATTERY STATE(V)");
+        </script>
+
+        <script>
+          var x2 = d3.scale.linear().range([0,width]);
+          var y2 = d3.scale.linear().range([height,0]);
+
+          //var yAxis1 = d3.svg.axis().scale(y1).orient("left").ticks(10, "V");
+          var yAxis2 = d3.svg.axis()
+                         .scale(y2)
+                         .orient("left")
+                         .innerTickSize(-width)
+                         .outerTickSize(0)
+                         .tickPadding(10);
+
+         var xAxis2 = d3.svg.axis()
+                        .scale(x2)
+                        .orient("bottom")
+                        .innerTickSize(-height)
+                        .outerTickSize(0)
+                        .tickPadding(10)
+                        .tickFormat("");
+
+          var valueline2 = d3.svg.line()
+                            .x(function(d,i){ return x2(i); })
+                            .y(function(d){ return y2(d); });
+
+          var svg2 = d3.select("#height_stat_div").append("svg")
+                       .attr("width", width + margin.left + margin.right)
+                       .attr("height",height + margin.top + margin.bottom)
+                       .append('g')
+                       .attr("transform","translate(" + margin.left + "," + margin.top + ")");
+
+          x2.domain(d3.extent(_height, function(d,i) { return i; }));
+          y2.domain([0, d3.max(_height, function(d){ return d})]);
+
+          var height_graph =svg2.append("path").attr("class", "line")
+                             .attr("d", valueline2(_height));
+
+          svg2.append("g")
+              .attr("class", "y axis")
+              .call(yAxis2);
+
+          svg2.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + height + ")")
+              .call(xAxis2);
+
+          svg2.append("text")
+              .attr("transform","translate(" + (width/2) + " ," + (height+margin.bottom-10) + ")")
+              .style("text-anchor", "middle")
+              .text("HEIGHT(cm)");
+        </script>
+      </div>
+
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            DRONE ATTITUDE
+          </div>
+          <div class="panel-body text-center">
+            <canvas id="lesson04-canvas" style="border: none;" width="500" height="300"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+
+</html>
