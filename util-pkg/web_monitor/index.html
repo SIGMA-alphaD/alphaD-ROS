@@ -134,6 +134,12 @@ _height = new Array(50).fill(0);
   
   px4flowListner.subscribe(function(message){
     $("#item4").text(message.ground_distance.toFixed(5));
+    _height.push(message.ground_distance);
+    _height.shift();
+    height_graph.attr("d", valueline2(_height));
+
+    y2.domain([0, d3.max(_height, function(d){ return d})]);
+    y2_graph.call(yAxis2);
   });
 </script>
 <!-- roslibjs end-------------------------------------------------------------->
