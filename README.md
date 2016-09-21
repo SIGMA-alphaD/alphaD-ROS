@@ -17,6 +17,7 @@ alphaD ROS Packages
     * type : std_msgs/Float32MultiArray
     * description : 해당 토픽으로 0~100 까지의 실수행렬(길이는 8)을 보내면 각각에 해당하는 채널에 pwm이 generate 된다.
     * example : [20.0, 20.0, 20.0, 20.0, 100.0, 0, 0, 0]
+    * 사용자가 직접 데이터 보내는 방법 : > rostopic pub /control/pwm std_msgs/Float32MultiArray "{data:[20.0, 20.0, 20.0, 20.0, 100.0, 0, 0, 0]}" (수정바람)
 
 * [spi_master](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/hal-pkg/spi_master)
   * 쉴드에 spi로 연결되어 있는 mpu9250과 통신하는 모듈
@@ -34,6 +35,23 @@ alphaD ROS Packages
     * /info/imu/data
     * type : sensor_msgs/Imu
     * description : madgwick 알고리즘을 이용해 필터링된 quaternion값을 퍼블리시 한다.
+
+* [chung_control](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/control-pkg/chung_control)
+  * imu_filter 노드에서 퍼블리시하는 quaternion값을 받아서 연산후에 i2c_master의 /control/pwm으로 퍼블리시한다.
+  * 앞에 chung-을 붙인 이유는, 여러가지 컨트롤 방법을 구분하기 위함이다.
+  * **Subscribing Message**
+    * /info/imu/data
+    * type : sensor_msgs/Imu
+    * description : quaternion Array (w,x,y,z)를 받는다. (쿼터니언 순서 수정바람)
+  * **Publishing Message**
+    * /control/pwm
+    * type : std_msgs/Float32MultiArray
+    * description : quaternion을 기반으로 계산한 pwm출력 값을 퍼블리시 한다.
+
+  * **[Control Policy]**
+    * z축(연직방향)의 움직임을 기준으로 판단함.
+    * [Ver. 0.2.0] 시간 t에서의 z축 벡터를 z(t)라 하면, z(t)를 x(0)와 y(0)가 이루는 평면에 정사영시킨 벡터 v(t)와 z(0)와 z(t)의 각도 theta를 기반으로 v(t)는 4개의 pwm신호의 가감(+ -)을, theta는 P 제어에 이용된다.  즉, 이 Version은 단순 P제어 방식이다.
+    * 다음 버전의 기술 바람.
 
 ### 1.3. [util-pkg](https://github.com/SIGMA-alphaD/alphaD-ROS/tree/master/util-pkg)
 - - -
