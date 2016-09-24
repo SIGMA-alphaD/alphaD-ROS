@@ -18,14 +18,15 @@ def callback(data):
 	wing_phi_offset = [pi*3/4, -pi*3/4, pi/4, -pi/4]
 
 	quaternion = [data.orientation.w, data.orientation.x, data.orientation.y, data.orientation.z]
-	for i in range(4):print quaternion[i],', ',
-	print ''
+	#for i in range(4):print quaternion[i],', ',
+	#print ''
 		
  
 	theta = acos(quaternion[0])/2.0
 	plane_x = 1-2*(quaternion[2]**2)-2*(quaternion[3]**2)
 	plane_y = 2*quaternion[1]*quaternion[2] + 2*quaternion[0]*quaternion[3]
-	
+	#print theta,', ',plane_x,', ',plane_y	
+
 	try:
 		phi = atan2(plane_y,plane_x)
 	except:
@@ -45,7 +46,7 @@ def callback(data):
 
 
 def shut_Handler():
-	print("shutdown node & drone")
+	#print("shutdown node & drone")
 	global flag_shutdown
 	flag_shutdown = 1
 
