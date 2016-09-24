@@ -14,44 +14,12 @@
 
 //---------------------------------------------------------------------------------------------------
 // Header files
-#include <ros/ros.h>
-#include <sensor_msgs/Imu.h>
-#include "MadgwickAHRS.h"
-#include <math.h>의 경우 라이브러리만 교체하는 것으로도 변경이 가능하다. 
-
-//---------------------------------------------------------------------------------------------------
-// Definitions
-
-#define sampleFreq	512.0f		// sample frequency in Hz
-#define betaDef		0.1f		// 2 * proportional gain
-
-//---------------------------------------------------------------------------------------------------
-// Variable definitions
-
-volatile float beta = betaDef;								// 2 * proportional gain (Kp)
-volatile float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
-float qqq[4] = {q0, q1, q2, q3}
-float acc[3] = {0.0f, 0.0f, 0.0f}
-float gyro[3] = {0.0f, 0.0f, 0.0f}
-
-int _prevT = -1;
-int _sampleRate = 300;
-//---------------------------------------------------------------------------------------------------
-// Function declarations
-
-ros::Publisher pub;
-ros::Subscriber sub;
-sensor_msgs::Imu msg;
-msg.header.frame_id = "imu";
-
-float invSqrt(float x);
-void Callback(const sensor_msgs::Imu::ConstPtr& data);
-void MadgwickAHRSupdate(float* qtn, float* gyro, float* acc, float* mag)
-void MadgwickAHRSupdateIMU(float* qtn, float* gyro, float* acc)
+#include "madgwick_cpp/madgwick_cpp.h"
 
 int main(int argc, char**argv){
 	ros::init(argc, argv, "imu_filter_run");
 	ros::NodeHandle nh;
+	msg.header.frame_id = "imu";
 
 	sub = nh.subscribe("info/imu/data_raw", 1000, Callback);
 	pub = nh.advertise<sensor_msgs::Imu>("info/imu/data",10);
@@ -63,7 +31,7 @@ int main(int argc, char**argv){
 
 void Callback(const sensor_msgs::Imu::ConstPtr& data){
 	if(_prevT != -1){
-		if((data->header.stamp.nsecs - _prevT) >= 1000.0/_sampleRate){
+		if((data->header.stamp.nsec - _prevT) >= 1000.0/_sampleRate){
 
 			acc[0] = data->linear_acceleration.x; acc[1] = data->linear_acceleration.y; acc[2] = data->linear_acceleration.z;
 			gyro[0] = data->angular_velocity.x; gyro[1] = data->angular_velocity.y; gyro[2] = data->angular_velocity.z;
@@ -75,10 +43,10 @@ void Callback(const sensor_msgs::Imu::ConstPtr& data){
 			msg.orientation.z = qqq[3];
 
 			pub.publish(msg);
-			_prevT = _prevT + 1000.0/_sampleRate
+			_prevT = _prevT + 1000.0/_sampleRate;
 		}
 	}else{
-		_prevT = data.header.stamp.nsecs;
+		_prevT = data->header.stamp.nsec;
 	}
 
 

@@ -33,9 +33,9 @@ int main(int argc, char** argv){
 	// Read data
 	mpu_data = mh.Read();
 	
-	Imu.linear_acceleration.x = mpu_data[0];
-	Imu.linear_acceleration.y = mpu_data[1];
-	Imu.linear_acceleration.z = mpu_data[2];
+	Imu.linear_acceleration.x = 9.8f * mpu_data[0];
+	Imu.linear_acceleration.y = 9.8f * mpu_data[1];
+	Imu.linear_acceleration.z = 9.8f * mpu_data[2];
 	
 	Imu.angular_velocity.x = mpu_data[3];
 	Imu.angular_velocity.y = mpu_data[4];

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>imu_filter</name>
+  <name>madgwick_cpp</name>
   <version>0.1.0</version>
   <description>The i2c_master package</description>
   <maintainer email="dydwo92@snu.ac.kr">YongJae Kim</maintainer>
